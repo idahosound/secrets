@@ -5,9 +5,9 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const ejs = require('ejs');
 const mongoose = require('mongoose');
-const session = require('express-session');
-const passport = require('passport');
-const passportLocalMongoose = require('passport-local-mongoose');
+const bcrypt = require('bcrypt');
+const saltRounds = 10;
+
 const app = express();
 
 app.use(express.static('public'));
@@ -41,11 +41,50 @@ app.get('/register', function(req, res) {
 });
 
 app.post('/register', function(req, res) {
-
+  bcrypt.hash(req.body.password, saltRounds, function(err, hash) {
+    if (err) {
+      console.log(err);
+    } else {
+      const newUser = new User({
+        email: req.body.username,
+        password: hash
+      });
+      newUser.save(function(err) {
+        if (err) {
+          console.log(err);
+        } else {
+          res.render('secrets');
+        }
+      });
+    }
+  });
 });
 
 app.post('/login', function(req, res) {
+  const userName = req.body.username;
+  const passWord = req.body.password;
 
+  User.findOne({
+    email: userName
+  }, function(err, foundUser) {
+    if (err) {
+      console.log(err);
+    } else {
+      if (foundUser) {
+        bcrypt.compare(passWord, foundUser.password, function(err, result) {
+          if (err) {
+            console.log(err);
+          } else if (result === true) {
+            res.render('secrets');
+          } else {
+            // Display an incorrect password page
+            console.log(passWord + " is an incorrect password.");
+            res.render('login');
+          }
+        });
+      }
+    }
+  });
 
 });
 
