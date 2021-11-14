@@ -20,6 +20,7 @@ const app = express();
 const server = https.createServer({key: key, cert: cert }, app);
 
 app.use(express.static('public'));
+app.set('views', 'views');
 app.set('view engine', 'ejs');
 app.use(bodyParser.urlencoded({
   extended: true
@@ -119,7 +120,7 @@ app.get("/secrets", function(req, res){
     } else {
       if(foundUsers){
         console.log(foundUsers);
-        res.render("/secrets", {usersWithSecrets: foundUsers})
+        res.render("secrets", {usersWithSecrets: foundUsers})
       }
     }
   });
