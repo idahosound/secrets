@@ -1,6 +1,8 @@
 //jshint esversion:6
 require('dotenv').config();
 
+//From mkcert. Required to run https on localhost
+//Note that the certificate authority and certificate were created on command line
 const fs = require('fs');
 const key = fs.readFileSync('./localhost-key.pem');
 const cert = fs.readFileSync('./localhost.pem');
@@ -10,23 +12,26 @@ const https = require('https');
 const bodyParser = require('body-parser');
 const ejs = require('ejs');
 const mongoose = require('mongoose');
+
+//to setup login strategies through Passport
 const findOrCreate = require('mongoose-findorcreate');
 const session = require('express-session');
 const passport = require('passport');
 const passportLocalMongoose = require('passport-local-mongoose');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const FacebookStrategy = require('passport-facebook').Strategy;
+
 const app = express();
+//create the app on an https secured server
 const server = https.createServer({key: key, cert: cert }, app);
 
 app.use(express.static('public'));
-app.set('views', 'views');
 app.set('view engine', 'ejs');
 app.use(bodyParser.urlencoded({
   extended: true
 }));
 app.use(session({
-  secret: '1BigAssSecret',
+  secret: process.env.SESSION_SECRET,
   resave: false,
   saveUninitialized: false,
 }));
